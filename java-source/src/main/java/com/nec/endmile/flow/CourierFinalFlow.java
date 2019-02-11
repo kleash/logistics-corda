@@ -1,6 +1,7 @@
 package com.nec.endmile.flow;
 
 import com.google.common.collect.ImmutableList;
+import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.contract.CourierContract;
 import com.nec.endmile.schema.CourierSchemaV1;
 import com.nec.endmile.state.CourierState;
@@ -21,12 +22,11 @@ import net.corda.core.utilities.ProgressTracker;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class CourierDocUploadFlow {
+public class CourierFinalFlow {
     @InitiatingFlow
     @StartableByRPC
     public static class Initiator extends FlowLogic<SignedTransaction> {
         private final String courierId;
-        private final String courierReceiptHash;
 
         private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction based on new Courier.");
         private final ProgressTracker.Step VERIFYING_TRANSACTION = new ProgressTracker.Step("Verifying contract constraints.");
@@ -48,9 +48,8 @@ public class CourierDocUploadFlow {
                 FINALISING_TRANSACTION
         );
 
-        public Initiator(String courierId, String courierReceiptHash) {
+        public Initiator(String courierId) {
             this.courierId = courierId;
-            this.courierReceiptHash = courierReceiptHash;
         }
 
         @Override
@@ -99,21 +98,20 @@ public class CourierDocUploadFlow {
 
             // Create output state
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(),
-                    courierState.getCourierWeight(), courierReceiptHash, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(),
-                    courierState.getAcceptedParty(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), courierState.getStatus(), new UniqueIdentifier(),
+                    courierState.getCourierWeight(), courierState.getCourierReceiptHash(), courierState.getSource(), courierState.getDestination(), courierState.getRequestor(),
+                    courierState.getAcceptedParty(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), CourierStatus.COURIER_PICKED, new UniqueIdentifier(),
                     courierState.getResponses(), courierState.getCourierId(), courierState.getAutoNodes());
 
             // Create command
-            final Command<CourierContract.Commands.CourierDocUpload> txCommand = new Command<>(
-                    new CourierContract.Commands.CourierDocUpload(),
+            final Command<CourierContract.Commands.CourierPicked> txCommand = new Command<>(
+                    new CourierContract.Commands.CourierPicked(),
                     ImmutableList.of(me.getOwningKey()));
 
-            // Build transaction with attachment hash
+            // Build transaction
             final TransactionBuilder txBuilder = new TransactionBuilder(notary)
                     .addInputState(courierStateStateAndRef)
                     .addOutputState(courierOutputState, CourierContract.CONTRACT_ID)
-                    .addCommand(txCommand)
-                    .addAttachment(SecureHash.parse(courierReceiptHash));
+                    .addCommand(txCommand);
 
             // Stage 2.
             progressTracker.setCurrentStep(VERIFYING_TRANSACTION);

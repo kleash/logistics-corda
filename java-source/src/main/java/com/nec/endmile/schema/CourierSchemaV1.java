@@ -35,7 +35,7 @@ public class CourierSchemaV1 extends MappedSchema {
         @Column(name = "courierWeight")
         private final int courierWeight;
         @Column(name = "courierReceiptHash")
-        private final SecureHash.SHA256 courierReceiptHash;
+        private final String courierReceiptHash;
         @Column(name = "source")
         private final String source;
         @Column(name = "destination")
@@ -59,7 +59,7 @@ public class CourierSchemaV1 extends MappedSchema {
         private final String courierId;
 
 
-        public PersistentCourier(int courierLength, int courierWidth, int courierHeight, int courierWeight, SecureHash.SHA256 courierReceiptHash, String source, String destination, String requestor, String acceptedParty,
+        public PersistentCourier(int courierLength, int courierWidth, int courierHeight, int courierWeight, String courierReceiptHash, String source, String destination, String requestor, String acceptedParty,
                                  String finalQuotedPrice, String finalDeliveryType, String status, UUID linearId,
                                  Map<String, String> responses, String courierId) {
             this.courierLength = courierLength;
@@ -114,7 +114,7 @@ public class CourierSchemaV1 extends MappedSchema {
             return courierWeight;
         }
 
-        public SecureHash.SHA256 getCourierReceiptHash() {
+        public String getCourierReceiptHash() {
             return courierReceiptHash;
         }
 
