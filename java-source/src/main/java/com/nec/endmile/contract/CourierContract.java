@@ -43,6 +43,8 @@ public class CourierContract implements Contract {
             verifyInit(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierRate) {
             verifyResponse(tx, setOfSigners);
+        } else if (commandData instanceof Commands.CourierDocUpload) {
+            verifyCourierDocUpload(tx, setOfSigners);
         } else {
             throw new IllegalArgumentException("Unrecognised command.");
         }
@@ -80,14 +82,23 @@ public class CourierContract implements Contract {
         });
     }
 
+    private void verifyCourierDocUpload(LedgerTransaction tx, Set<PublicKey> signers) {
+        requireThat(req -> {
+            return null;
+        });
+    }
+
     /**
-     * This contract only implements one command, Create.
+     * This contract implements all commands related to CourierState
      */
     public interface Commands extends CommandData {
         class CourierPost implements Commands {
         }
 
         class CourierRate implements Commands {
+        }
+
+        class CourierDocUpload implements Commands {
         }
     }
 }
