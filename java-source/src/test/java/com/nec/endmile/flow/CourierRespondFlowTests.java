@@ -1,11 +1,18 @@
 package com.nec.endmile.flow;
 
 import com.google.common.collect.ImmutableList;
+import com.nec.endmile.config.CourierStatus;
+import com.nec.endmile.contract.CourierContract;
 import com.nec.endmile.state.CourierState;
 import net.corda.core.concurrent.CordaFuture;
+import net.corda.core.contracts.Command;
+import net.corda.core.contracts.CommandData;
 import net.corda.core.contracts.StateAndRef;
+import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.CordaX500Name;
+import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
+import net.corda.core.transactions.TransactionBuilder;
 import net.corda.testing.node.MockNetwork;
 import net.corda.testing.node.StartedMockNode;
 import org.junit.After;
@@ -14,22 +21,51 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import javax.annotation.Signed;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class CourierRequestFlowTests {
+public class CourierRespondFlowTests {
     private MockNetwork network;
     private StartedMockNode amazon;
     private StartedMockNode necAuto;
 
+    private String courierId= null;
     @Before
     public void setup() {
-        network = new MockNetwork(ImmutableList.of("com.nec.endmile.contract","com.nec.endmile.schema"));
+        network = new MockNetwork(ImmutableList.of("com.nec.endmile.contract", "com.nec.endmile.schema"));
         amazon = network.createPartyNode(new CordaX500Name("Amazon", "London", "GB"));
         necAuto = network.createPartyNode(new CordaX500Name("NECAuto", "New York", "US"));
 
         network.runNetwork();
+
+        initTransaction(10,10,10,10,"krpuram","marathahalli");
+    }
+
+    private void initTransaction(int courierLength, int courierWidth, int courierHeight, int courierWeight, String source, String destination) {
+        List<Party> allParties = new ArrayList<>();
+        allParties.add(amazon.getInfo().getLegalIdentities().get(0));
+        allParties.add(necAuto.getInfo().getLegalIdentities().get(0));
+        UniqueIdentifier uniqueIdentifier = new UniqueIdentifier();
+        courierId=uniqueIdentifier.getId().toString();
+        CourierState courierState = new CourierState(courierLength, courierWidth, courierHeight, courierWeight,source,
+                destination, amazon.getInfo().getLegalIdentities().get(0), CourierStatus.COURIER_INITIATE, uniqueIdentifier, uniqueIdentifier.getId().toString(), allParties);
+
+
+        final TransactionBuilder txBuilder = new TransactionBuilder(network.getDefaultNotaryIdentity()).addOutputState(courierState, CourierContract.CONTRACT_ID)
+                .addCommand(new Command<>(
+                   new CourierContract.Commands.Init(),
+                        ImmutableList.of(amazon.getInfo().getLegalIdentities().get(0).getOwningKey())
+                        ));
+
+        final SignedTransaction txn = amazon.getServices().signInitialTransaction(txBuilder);
+
+        final SignedTransaction txnFinal = network.getDefaultNotaryNode().getServices().addSignature(txn);
+
+        amazon.getServices().recordTransactions(txnFinal);
+        necAuto.getServices().recordTransactions(txnFinal);
     }
 
 
@@ -75,8 +111,9 @@ public class CourierRequestFlowTests {
 
     @Test
     public void flowRecordsATransactionInBothPartiesTransactionStorages() throws Exception {
-        CourierRequestFlow.Initiator flow = new CourierRequestFlow.Initiator(10, 10, 10, 10, "krpuram", "marathahalli", necAuto.getInfo().getLegalIdentities().get(0));
-        CordaFuture<SignedTransaction> future = amazon.startFlow(flow);
+
+        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "100", "200","auto1");
+        CordaFuture<SignedTransaction> future = necAuto.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTx = future.get();
 
@@ -116,8 +153,8 @@ public class CourierRequestFlowTests {
 
     @Test
     public void flowRecordsTheCorrectCourierInBothPartiesVaults() throws Exception {
-        CourierRequestFlow.Initiator flow = new CourierRequestFlow.Initiator(10, 10, 10, 10, "krpuram", "marathahalli", necAuto.getInfo().getLegalIdentities().get(0));
-        CordaFuture<SignedTransaction> future = amazon.startFlow(flow);
+        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "100", "200","auto1");
+        CordaFuture<SignedTransaction> future = necAuto.startFlow(flow);
         network.runNetwork();
         future.get();
 
@@ -126,12 +163,17 @@ public class CourierRequestFlowTests {
             node.transaction(() -> {
                 List<StateAndRef<CourierState>> courier = node.getServices().getVaultService().queryBy(CourierState.class).getStates();
                 System.out.println("courier.size() " + courier.size());
+                courier.stream().forEach(e->{
+                    System.out.println("ALL THE Courier state in Node "+node.getServices().getMyInfo().getLegalIdentities().get(0).getName().toString()+
+                            " is "+e.getState().getData());
+
+                });
                 assertEquals(1, courier.size());
                 CourierState recordedState = courier.get(0).getState().getData();
-                System.out.println(recordedState);
                 assertEquals(recordedState.getCourierHeight(), 10);
                 assertEquals(recordedState.getCourierLength(), 10);
                 assertEquals(recordedState.getCourierWeight(), 10);
+
                 return null;
             });
         }

@@ -1,6 +1,7 @@
 package com.nec.endmile.flow;
 
 
+import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
 import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.contract.CourierContract;
@@ -35,6 +36,7 @@ public class CourierRespondFlow {
         private final String courierId;
         private final String sharedPrice;
         private final String dedicatedPrice;
+        private final String responderID;
 
 
         private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction for courier response.");
@@ -58,10 +60,11 @@ public class CourierRespondFlow {
                 FINALISING_TRANSACTION
         );
 
-        public Responder(String courierId, String sharedPrice, String dedicatedPrice) {
+        public Responder(String courierId, String sharedPrice, String dedicatedPrice,String responderID) {
             this.courierId = courierId;
             this.sharedPrice = sharedPrice;
             this.dedicatedPrice = dedicatedPrice;
+            this.responderID=responderID;
         }
 
         @Override
@@ -69,6 +72,7 @@ public class CourierRespondFlow {
             return progressTracker;
         }
 
+        @Suspendable
         @Override
         public SignedTransaction call() throws FlowException {
             // Obtain a reference to the notary we want to use.
@@ -96,10 +100,15 @@ public class CourierRespondFlow {
             Vault.Page<CourierState> queryResult = getServiceHub().getVaultService().queryBy(CourierState.class, criteria);
             List<StateAndRef<CourierState>> couriers = queryResult.getStates();
 
+
+            if (couriers == null) {
+                throw new FlowException("No couriers present in ledger");
+            }
+
             CourierState courierState = null;
             StateAndRef<CourierState> courierStateStateAndRef = null;
             for (StateAndRef<CourierState> temp : couriers) {
-                if (temp.getState().getData().getLinearId().getId().equals(this.courierId)) {
+                if (temp.getState().getData().getCourierId().equals(this.courierId)) {
                     courierStateStateAndRef = temp;
                     courierState = temp.getState().getData();
                 }
@@ -107,29 +116,30 @@ public class CourierRespondFlow {
 
             if (courierState == null) {
                 throw new FlowException("Invalid courier id");
+            }else{
+                System.out.println("Courier input state"+courierState);
             }
 
-            Map<String, String> responses = null;
-            if (courierState.getResponses() == null) {
-                responses = new LinkedHashMap<>();
+            Map<String, String> responses = new LinkedHashMap<>();;
+            if (courierState.getResponses() != null) {
+
+                responses.putAll(courierState.getResponses());
             }
 
-            responses = CourierState.addResponse(responses, me.getName().toString(), this.sharedPrice ,this.dedicatedPrice);
+
+            responses = CourierState.addResponse(responses, responderID, this.sharedPrice ,this.dedicatedPrice);
 
 
             //TODO Change it to create list of initiating party and AUTO nodes.
             //Right now it's sending to initiating parties also
-            List<Party> allParties = new ArrayList<>();
-            allParties.add(me);
+            List<Party> autoNodes = new ArrayList<>();
+            autoNodes.add(me);
 
-            System.out.println("List of parties " + allParties.size());
-            //ENDS HERE
-
-            System.out.println("List of parties " + allParties.size());
+            System.out.println("List of auto nodes " + autoNodes.size());
             //ENDS HERE
 
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(), courierState.getCourierWeight(),
-                    courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), CourierStatus.COURIER_RESPONSE_RECEIVED, new UniqueIdentifier(), courierState.getCourierId(), responses,allParties);
+                    courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), CourierStatus.COURIER_RESPONSE_RECEIVED, new UniqueIdentifier(), courierState.getCourierId(), responses,autoNodes);
 
 
             final Command<CourierContract.Commands.Respond> txCommand = new Command<>(

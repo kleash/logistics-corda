@@ -245,10 +245,10 @@ public class CourierState implements LinearState, QueryableState {
     @Override
     public String toString() {
         return "CourierState{" +
-                "courierLength=" + courierLength + '\'' +
-                ", courierWidth=" + courierWidth + '\'' +
-                ", courierHeight=" + courierHeight + '\'' +
-                ", courierWeight=" + courierWeight + '\'' +
+                "courierLength=" + courierLength +
+                ", courierWidth=" + courierWidth +
+                ", courierHeight=" + courierHeight +
+                ", courierWeight=" + courierWeight +
                 ", courierReceiptHash='" + courierReceiptHash + '\'' +
                 ", source='" + source + '\'' +
                 ", destination='" + destination + '\'' +
@@ -257,9 +257,10 @@ public class CourierState implements LinearState, QueryableState {
                 ", finalQuotedPrice='" + finalQuotedPrice + '\'' +
                 ", finalDeliveryType='" + finalDeliveryType + '\'' +
                 ", status='" + status + '\'' +
-                ", linearId=" + linearId + '\'' +
-                ", responses=" + responses + '\'' +
-                ", courierId=" + courierId +
+                ", linearId=" + linearId +
+                ", courierId='" + courierId + '\'' +
+                ", responses=" + responses +
+                ", autoNodes=" + autoNodes +
                 '}';
     }
 }

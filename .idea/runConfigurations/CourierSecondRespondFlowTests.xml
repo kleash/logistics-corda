@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CourierSecondRespondFlowTests" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+    <module name="com.java-source.test" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.nec.endmile.flow.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="com.nec.endmile.flow" />
+    <option name="MAIN_CLASS_NAME" value="com.nec.endmile.flow.CourierSecondRespondFlowTests" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:../lib/quasar.jar" />
+    <option name="PARAMETERS" value="" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

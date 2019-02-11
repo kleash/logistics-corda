@@ -83,16 +83,15 @@ public class CourierRequestFlow {
 
             //TODO Change it to create list of initiating party and AUTO nodes.
             //Right now it's sending to initiating parties also
-            List<Party> allParties = new ArrayList<>();
-            allParties.add(me);
-            allParties.add(autoNode);
+            List<Party> autoNodes = new ArrayList<>();
+            autoNodes.add(autoNode);
 
-            System.out.println("List of parties " + allParties.size());
+            System.out.println("List of parties " + autoNodes.size());
             //ENDS HERE
 
             UniqueIdentifier uniqueIdentifier = new UniqueIdentifier();
             CourierState courierState = new CourierState(this.courierLength, this.courierWidth, this.courierHeight, this.courierWeight,
-                    this.source, this.destination, me, CourierStatus.COURIER_INITIATE, uniqueIdentifier, uniqueIdentifier.getId().toString(), allParties);
+                    this.source, this.destination, me, CourierStatus.COURIER_INITIATE, uniqueIdentifier, uniqueIdentifier.getId().toString(), autoNodes);
 
             final Command<CourierContract.Commands.Init> txCommand = new Command<>(
                     new CourierContract.Commands.Init(),

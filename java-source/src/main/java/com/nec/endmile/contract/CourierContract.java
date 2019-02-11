@@ -1,10 +1,12 @@
 package com.nec.endmile.contract;
 
 import com.example.state.IOUState;
+import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.state.CourierState;
 import net.corda.core.contracts.CommandData;
 import net.corda.core.contracts.CommandWithParties;
 import net.corda.core.contracts.Contract;
+import net.corda.core.contracts.ContractState;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.transactions.LedgerTransaction;
 
@@ -70,6 +72,12 @@ public class CourierContract implements Contract {
             req.using("Only one courier state when responding to courier request",
                     tx.getInputStates().size() == 1);
             req.using("Only one courier state should be created when responding to courier request.", tx.getOutputStates().size() == 1);
+
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Courier Input state status can be either initiated or response received.", courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATE) || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_RESPONSE_RECEIVED));
+
+
             return null;
 
             //TODO Minimum validation as of now. Implement at API layer
