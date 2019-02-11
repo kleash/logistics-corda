@@ -22,11 +22,10 @@ import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 
-public class CourierSecondRespondFlowTests {
+public class CourierCourierRateFlowTests {
     private MockNetwork network;
     private StartedMockNode amazon;
     private StartedMockNode necAuto;
@@ -41,13 +40,6 @@ public class CourierSecondRespondFlowTests {
         network.runNetwork();
 
         initTransaction(10,10,10,10,"krpuram","marathahalli");
-        try {
-            addFirstResponse();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void initTransaction(int courierLength, int courierWidth, int courierHeight, int courierWeight, String source, String destination) {
@@ -62,7 +54,7 @@ public class CourierSecondRespondFlowTests {
 
         final TransactionBuilder txBuilder = new TransactionBuilder(network.getDefaultNotaryIdentity()).addOutputState(courierState, CourierContract.CONTRACT_ID)
                 .addCommand(new Command<>(
-                   new CourierContract.Commands.Init(),
+                   new CourierContract.Commands.CourierPost(),
                         ImmutableList.of(amazon.getInfo().getLegalIdentities().get(0).getOwningKey())
                         ));
 
@@ -72,13 +64,6 @@ public class CourierSecondRespondFlowTests {
 
         amazon.getServices().recordTransactions(txnFinal);
         necAuto.getServices().recordTransactions(txnFinal);
-    }
-
-    private void addFirstResponse() throws ExecutionException, InterruptedException {
-        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "100", "200","auto1");
-        CordaFuture<SignedTransaction> future = necAuto.startFlow(flow);
-        network.runNetwork();
-        future.get();
     }
 
 
@@ -125,7 +110,7 @@ public class CourierSecondRespondFlowTests {
     @Test
     public void flowRecordsATransactionInBothPartiesTransactionStorages() throws Exception {
 
-        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "150", "200","auto2");
+        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "100", "200","auto1");
         CordaFuture<SignedTransaction> future = necAuto.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTx = future.get();
@@ -166,7 +151,7 @@ public class CourierSecondRespondFlowTests {
 
     @Test
     public void flowRecordsTheCorrectCourierInBothPartiesVaults() throws Exception {
-        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "150", "200","auto2");
+        CourierRespondFlow.Responder flow = new CourierRespondFlow.Responder(courierId, "100", "200","auto1");
         CordaFuture<SignedTransaction> future = necAuto.startFlow(flow);
         network.runNetwork();
         future.get();

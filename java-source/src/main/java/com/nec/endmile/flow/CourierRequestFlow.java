@@ -9,7 +9,6 @@ import com.nec.endmile.state.CourierState;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.flows.*;
-import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
@@ -93,8 +92,8 @@ public class CourierRequestFlow {
             CourierState courierState = new CourierState(this.courierLength, this.courierWidth, this.courierHeight, this.courierWeight,
                     this.source, this.destination, me, CourierStatus.COURIER_INITIATE, uniqueIdentifier, uniqueIdentifier.getId().toString(), autoNodes);
 
-            final Command<CourierContract.Commands.Init> txCommand = new Command<>(
-                    new CourierContract.Commands.Init(),
+            final Command<CourierContract.Commands.CourierPost> txCommand = new Command<>(
+                    new CourierContract.Commands.CourierPost(),
                     ImmutableList.of(me.getOwningKey()));
             final TransactionBuilder txBuilder = new TransactionBuilder(notary)
                     .addOutputState(courierState, CourierContract.CONTRACT_ID)

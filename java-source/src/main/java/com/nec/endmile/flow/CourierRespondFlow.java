@@ -11,9 +11,7 @@ import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.flows.*;
-import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
-import net.corda.core.node.NodeInfo;
 import net.corda.core.node.services.Vault;
 import net.corda.core.node.services.vault.Builder;
 import net.corda.core.node.services.vault.CriteriaExpression;
@@ -21,11 +19,9 @@ import net.corda.core.node.services.vault.QueryCriteria;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
-import org.hibernate.Criteria;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CourierRespondFlow {
 
@@ -142,8 +138,8 @@ public class CourierRespondFlow {
                     courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), CourierStatus.COURIER_RESPONSE_RECEIVED, new UniqueIdentifier(), courierState.getCourierId(), responses,autoNodes);
 
 
-            final Command<CourierContract.Commands.Respond> txCommand = new Command<>(
-                    new CourierContract.Commands.Respond(),
+            final Command<CourierContract.Commands.CourierRate> txCommand = new Command<>(
+                    new CourierContract.Commands.CourierRate(),
                     ImmutableList.of(me.getOwningKey()));
 
             final TransactionBuilder txBuilder = new TransactionBuilder(notary)

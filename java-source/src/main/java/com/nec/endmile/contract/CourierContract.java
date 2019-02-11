@@ -1,19 +1,15 @@
 package com.nec.endmile.contract;
 
-import com.example.state.IOUState;
 import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.state.CourierState;
 import net.corda.core.contracts.CommandData;
 import net.corda.core.contracts.CommandWithParties;
 import net.corda.core.contracts.Contract;
-import net.corda.core.contracts.ContractState;
-import net.corda.core.identity.AbstractParty;
 import net.corda.core.transactions.LedgerTransaction;
 
 import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static net.corda.core.contracts.ContractsDSL.requireSingleCommand;
 import static net.corda.core.contracts.ContractsDSL.requireThat;
@@ -43,9 +39,9 @@ public class CourierContract implements Contract {
         final Commands commandData = command.getValue();
         final Set<PublicKey> setOfSigners = new HashSet<>(command.getSigners());
 
-        if (commandData instanceof Commands.Init) {
+        if (commandData instanceof Commands.CourierPost) {
             verifyInit(tx, setOfSigners);
-        } else if (commandData instanceof Commands.Respond) {
+        } else if (commandData instanceof Commands.CourierRate) {
             verifyResponse(tx, setOfSigners);
         } else {
             throw new IllegalArgumentException("Unrecognised command.");
@@ -88,10 +84,10 @@ public class CourierContract implements Contract {
      * This contract only implements one command, Create.
      */
     public interface Commands extends CommandData {
-        class Init implements Commands {
+        class CourierPost implements Commands {
         }
 
-        class Respond implements Commands {
+        class CourierRate implements Commands {
         }
     }
 }
