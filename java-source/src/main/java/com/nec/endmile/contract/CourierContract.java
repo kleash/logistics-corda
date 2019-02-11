@@ -52,7 +52,12 @@ CourierContract implements Contract {
             verifyCourierPicked(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierDelivered) {
             verifyCourierDelivered(tx, setOfSigners);
-        } else {
+        } else if (commandData instanceof Commands.CourierCancelByRequestor) {
+            verifyCourierCancelByRequestor(tx, setOfSigners);
+        } else if (commandData instanceof Commands.CourierCancelByResponder) {
+            verifyCourierCancelByResponder(tx, setOfSigners);
+        }
+        else {
             throw new IllegalArgumentException("Unrecognised command.");
         }
 
@@ -151,6 +156,36 @@ CourierContract implements Contract {
         });
     }
 
+    private void verifyCourierCancelByRequestor(LedgerTransaction tx, Set<PublicKey> signers) {
+        requireThat(req -> {
+            req.using("Only one input state during CourierCancelByRequestor flow",
+                    tx.getInputStates().size() == 1);
+            req.using("Only one output state during CourierCancelByRequestor flow",
+                    tx.getOutputStates().size() == 1);
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Input CourierState should have either 'initiated' or 'accepted' status",
+                    (courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATED)
+                            || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED)));
+            return null;
+        });
+    }
+
+    private void verifyCourierCancelByResponder(LedgerTransaction tx, Set<PublicKey> signers) {
+        requireThat(req -> {
+            req.using("Only one input state during CourierCancelByResponder flow",
+                    tx.getInputStates().size() == 1);
+            req.using("Only one output state during CourierCancelByResponder flow",
+                    tx.getOutputStates().size() == 1);
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Input CourierState should have either 'initiated' or 'accepted' status",
+                    (courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATED)
+                            || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED)));
+            return null;
+        });
+    }
+
     /**
      * This contract implements all commands related to CourierState
      */
@@ -174,6 +209,14 @@ CourierContract implements Contract {
         }
 
         class CourierDelivered implements Commands {
+
+        }
+
+        class CourierCancelByRequestor implements Commands {
+
+        }
+
+        class CourierCancelByResponder implements Commands {
 
         }
     }
