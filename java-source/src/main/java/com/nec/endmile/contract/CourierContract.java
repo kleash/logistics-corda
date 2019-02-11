@@ -50,6 +50,8 @@ CourierContract implements Contract {
             verifyCourierDocUpload(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierPicked) {
             verifyCourierPicked(tx, setOfSigners);
+        } else if (commandData instanceof Commands.CourierDelivered) {
+            verifyCourierDelivered(tx, setOfSigners);
         } else {
             throw new IllegalArgumentException("Unrecognised command.");
         }
@@ -123,14 +125,28 @@ CourierContract implements Contract {
 
     private void verifyCourierPicked(LedgerTransaction tx, Set<PublicKey> signers) {
         requireThat(req -> {
-            req.using("Only one input state during CourierDocUpload flow",
+            req.using("Only one input state during CourierPicked flow",
                     tx.getInputStates().size() == 1);
-            req.using("Only one output state during CourierDocUpload flow",
+            req.using("Only one output state during CourierPicked flow",
                     tx.getOutputStates().size() == 1);
 
             CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
             req.using("Input CourierState should have 'accepted' status",
                     courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED));
+            return null;
+        });
+    }
+
+    private void verifyCourierDelivered(LedgerTransaction tx, Set<PublicKey> signers) {
+        requireThat(req -> {
+            req.using("Only one input state during CourierDelivered flow",
+                    tx.getInputStates().size() == 1);
+            req.using("Only one output state during CourierDelivered flow",
+                    tx.getOutputStates().size() == 1);
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Input CourierState should have 'picked' status",
+                    courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_PICKED));
             return null;
         });
     }
@@ -154,6 +170,10 @@ CourierContract implements Contract {
         }
 
         class CourierPicked implements Commands {
+
+        }
+
+        class CourierDelivered implements Commands {
 
         }
     }

@@ -27,6 +27,7 @@ public class CourierFinalFlow {
     @StartableByRPC
     public static class Initiator extends FlowLogic<SignedTransaction> {
         private final String courierId;
+        private final String status;
 
         private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction based on new Courier.");
         private final ProgressTracker.Step VERIFYING_TRANSACTION = new ProgressTracker.Step("Verifying contract constraints.");
@@ -48,8 +49,9 @@ public class CourierFinalFlow {
                 FINALISING_TRANSACTION
         );
 
-        public Initiator(String courierId) {
+        public Initiator(String courierId, String status) {
             this.courierId = courierId;
+            this.status = status;
         }
 
         @Override
@@ -99,13 +101,21 @@ public class CourierFinalFlow {
             // Create output state
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(),
                     courierState.getCourierWeight(), courierState.getCourierReceiptHash(), courierState.getSource(), courierState.getDestination(), courierState.getRequestor(),
-                    courierState.getAcceptedResponder(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), CourierStatus.COURIER_PICKED, new UniqueIdentifier(),
+                    courierState.getAcceptedResponder(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), status, new UniqueIdentifier(),
                     courierState.getResponses(), courierState.getCourierId(), courierState.getAutoNodes());
 
-            // Create command
-            final Command<CourierContract.Commands.CourierPicked> txCommand = new Command<>(
-                    new CourierContract.Commands.CourierPicked(),
-                    ImmutableList.of(me.getOwningKey()));
+            Command<CourierContract.Commands> txCommand = null;
+            if(status.equals(CourierStatus.COURIER_PICKED)) {
+                txCommand = new Command<>(
+                        new CourierContract.Commands.CourierPicked(),
+                        ImmutableList.of(me.getOwningKey()));
+            } else if(status.equals(CourierStatus.COURIER_DELIVERED)) {
+                txCommand = new Command<>(
+                        new CourierContract.Commands.CourierDelivered(),
+                        ImmutableList.of(me.getOwningKey()));
+            } else {
+                throw new FlowException("Courier has invalid status");
+            }
 
             // Build transaction
             final TransactionBuilder txBuilder = new TransactionBuilder(notary)
