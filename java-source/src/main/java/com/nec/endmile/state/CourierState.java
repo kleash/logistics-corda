@@ -141,21 +141,28 @@ public class CourierState implements LinearState, QueryableState {
         return responses;
     }
 
+
     public static String getPrice(Map<String, String> responses, String finalDeliveryType, String acceptedResponder) {
 
-        if (responses == null)
-            return null;
 
+        System.out.println("gePrice method input" + responses + " type " + finalDeliveryType + " acceptedResponder " + acceptedResponder);
+        if (responses == null) {
+            System.err.println("Responses not present");
+            return null;
+        }
         String rates = responses.get(acceptedResponder);
 
         if (rates == null) {
+            System.err.println("acceptedResponder not present");
             return null;
         }
 
-        if (finalDeliveryType.equalsIgnoreCase(CourierType.DEDICATED)) {
+        String[] split = rates.split("-");
 
-        } else if (finalDeliveryType.equalsIgnoreCase(CourierType.SHARED)) {
-
+        if (finalDeliveryType.equalsIgnoreCase(CourierType.SHARED)) {
+            return split[0];
+        } else if (finalDeliveryType.equalsIgnoreCase(CourierType.DEDICATED)) {
+            return split[1];
         }
 
 

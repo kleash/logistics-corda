@@ -118,12 +118,18 @@ public class CourierContractAcceptFlow {
                 System.out.println("Courier input state"+courierState);
             }
 
-
             //ENDS HERE
+
+
+            String price = CourierState.getPrice(courierState.getResponses(),this.finalDeliveryType,this.responderID);
+
+            if(price==null){
+                throw new FlowException("Courier responder id is not present or courier type is wrong");
+            }
 
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(), courierState.getCourierWeight(),
             null, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), this.responderID,
-                    CourierState.getPrice(courierState.getResponses(),this.finalDeliveryType,this.responderID), this.finalDeliveryType, CourierStatus.COURIER_ACCEPTED, new UniqueIdentifier(), courierState.getResponses(),
+                    price , this.finalDeliveryType, CourierStatus.COURIER_ACCEPTED, new UniqueIdentifier(), courierState.getResponses(),
                     courierState.getCourierId(), courierState.getAutoNodes());
 
 
