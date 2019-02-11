@@ -2,9 +2,7 @@ package com.nec.endmile.api;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.nec.endmile.flow.CourierDocUploadFlow;
-import com.nec.endmile.flow.CourierFinalFlow;
-import com.nec.endmile.flow.CourierRequestFlow;
+import com.nec.endmile.flow.*;
 import com.nec.endmile.state.CourierState;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.crypto.SecureHash;
@@ -76,7 +74,7 @@ public class CourierApi2 {
     }
 
     /**
-     * Responder updating courier status to "picked"
+     * Responder updating courier status to "picked" or "delivered"
      * <p>
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
@@ -85,12 +83,68 @@ public class CourierApi2 {
      */
     @PUT
     @Path("updateCourierStatus")
-    public Response uploadCourierReceipt(@QueryParam("courierId") int courierId,
+    public Response updateCourierStatus(@QueryParam("courierId") int courierId,
                                          @QueryParam("status") String status) throws InterruptedException, ExecutionException {
 
         try {
             final SignedTransaction signedTx = rpcOps
                     .startTrackedFlowDynamic(CourierFinalFlow.Initiator.class, courierId, status)
+                    .getReturnValue()
+                    .get();
+
+            final String msg = String.format("Transaction id %s committed to ledger.\n", signedTx.getId());
+            return Response.status(OK).entity(msg).build();
+
+        } catch (Throwable ex) {
+            final String msg = ex.getMessage();
+            logger.error(ex.getMessage(), ex);
+            return Response.status(BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    /**
+     * Courier cancellation by Requestor
+     * <p>
+     * <p>
+     * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
+     * <p>
+     * curl -X POST 'http://localhost:10009/api/courier/cancelByRequestor?courierId='
+     */
+    @PUT
+    @Path("cancelByRequestor")
+    public Response cancelByRequestor(@QueryParam("courierId") int courierId) throws InterruptedException, ExecutionException {
+
+        try {
+            final SignedTransaction signedTx = rpcOps
+                    .startTrackedFlowDynamic(CourierRequestorCancelFlow.Initiator.class, courierId)
+                    .getReturnValue()
+                    .get();
+
+            final String msg = String.format("Transaction id %s committed to ledger.\n", signedTx.getId());
+            return Response.status(OK).entity(msg).build();
+
+        } catch (Throwable ex) {
+            final String msg = ex.getMessage();
+            logger.error(ex.getMessage(), ex);
+            return Response.status(BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    /**
+     * Courier cancellation by Responder
+     * <p>
+     * <p>
+     * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
+     * <p>
+     * curl -X POST 'http://localhost:10009/api/courier/cancelByResponder?courierId='
+     */
+    @PUT
+    @Path("cancelByResponder")
+    public Response cancelByResponder(@QueryParam("courierId") int courierId) throws InterruptedException, ExecutionException {
+
+        try {
+            final SignedTransaction signedTx = rpcOps
+                    .startTrackedFlowDynamic(CourierResponderCancelFlow.Initiator.class, courierId)
                     .getReturnValue()
                     .get();
 
