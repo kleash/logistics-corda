@@ -86,10 +86,10 @@ public class CourierApi {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      *
-     * curl -X PUT 'http://localhost:10009/api/couriers/create?courierLength=10&courierWidth=10&courierHeight=10&courierWeight=10&source=krpuram&destination=marathahalli&partyName=O=NECAuto,L=New%20York,C=US'
-     */
-    @PUT
-    @Path("create")
+     * curl -X PUT 'http://localhost:10009/api/courier/create-courier?courierLength=10&courierWidth=10&courierHeight=10&courierWeight=10&source=krpuram&destination=marathahalli&partyName=O=NECAuto,L=New%20York,C=US'
+            */
+    @POST
+    @Path("create-courier")
     public Response createCourier(@QueryParam("courierLength") int courierLength, @QueryParam("courierWidth") int courierWidth,
                                   @QueryParam("courierHeight") int courierHeight, @QueryParam("courierWeight") int courierWeight,
                                   @QueryParam("source") String source,
