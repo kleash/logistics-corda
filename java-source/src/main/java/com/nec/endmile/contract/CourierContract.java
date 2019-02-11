@@ -43,12 +43,32 @@ public class CourierContract implements Contract {
             verifyCourierPost(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierRate) {
             verifyCourierRate(tx, setOfSigners);
-        } else if (commandData instanceof Commands.CourierDocUpload) {
+        } else if (commandData instanceof Commands.CourierContractAccept) {
+            verifyCourierAccept(tx, setOfSigners);
+        }else if (commandData instanceof Commands.CourierDocUpload) {
             verifyCourierDocUpload(tx, setOfSigners);
         } else {
             throw new IllegalArgumentException("Unrecognised command.");
         }
 
+    }
+
+    private void verifyCourierAccept(LedgerTransaction tx, Set<PublicKey> setOfSigners) {
+
+        requireThat(req -> {
+            req.using("Only one courier state when responding to courier request",
+                    tx.getInputStates().size() == 1);
+            req.using("Only one courier state should be created when responding to courier request.", tx.getOutputStates().size() == 1);
+
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Courier Input state status can be either initiated or response-received", courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_RESPONSE_RECEIVED));
+
+
+            return null;
+
+            //TODO Minimum validation as of now. Implement at API layer
+        });
     }
 
     // This only allows one courier per transaction.
@@ -109,6 +129,9 @@ public class CourierContract implements Contract {
         }
 
         class CourierDocUpload implements Commands {
+        }
+
+         class CourierContractAccept implements Commands{
         }
     }
 }

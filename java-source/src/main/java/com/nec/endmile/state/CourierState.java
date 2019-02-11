@@ -1,6 +1,7 @@
 package com.nec.endmile.state;
 
 import com.google.common.collect.ImmutableList;
+import com.nec.endmile.config.CourierType;
 import com.nec.endmile.schema.CourierSchemaV1;
 import net.corda.core.contracts.LinearState;
 import net.corda.core.contracts.UniqueIdentifier;
@@ -28,7 +29,7 @@ public class CourierState implements LinearState, QueryableState {
     private final String source;
     private final String destination;
     private final Party requestor;
-    private final Party acceptedParty;
+    private final String acceptedResponder;
     private final String finalQuotedPrice;
     private final String finalDeliveryType;
     private final String status;
@@ -39,7 +40,7 @@ public class CourierState implements LinearState, QueryableState {
 
     @ConstructorForDeserialization
     public CourierState(int courierLength, int courierWidth, int courierHeight, int courierWeight,
-                        SecureHash.SHA256 courierReceiptHash, String source, String destination, Party requestor, Party acceptedParty,
+                        SecureHash.SHA256 courierReceiptHash, String source, String destination, Party requestor, String acceptedResponder,
                         String finalQuotedPrice, String finalDeliveryType, String status, UniqueIdentifier linearId, Map<String, String> responses,
                         String courierId, List<Party> autoNodes) {
         this.courierLength = courierLength;
@@ -50,7 +51,7 @@ public class CourierState implements LinearState, QueryableState {
         this.source = source;
         this.destination = destination;
         this.requestor = requestor;
-        this.acceptedParty = acceptedParty;
+        this.acceptedResponder = acceptedResponder;
         this.finalQuotedPrice = finalQuotedPrice;
         this.finalDeliveryType = finalDeliveryType;
         this.status = status;
@@ -83,7 +84,7 @@ public class CourierState implements LinearState, QueryableState {
         this.source = source;
         this.destination = destination;
         this.requestor = requestor;
-        this.acceptedParty = null;
+        this.acceptedResponder = null;
         this.finalQuotedPrice = null;
         this.finalDeliveryType = null;
         this.status = status;
@@ -116,7 +117,7 @@ public class CourierState implements LinearState, QueryableState {
         this.source = source;
         this.destination = destination;
         this.requestor = requestor;
-        this.acceptedParty = null;
+        this.acceptedResponder = null;
         this.finalQuotedPrice = null;
         this.finalDeliveryType = null;
         this.status = status;
@@ -136,6 +137,27 @@ public class CourierState implements LinearState, QueryableState {
         responses.put(responderId, sharedPrice + "-" + dedicatedPrice);
 
         return responses;
+    }
+
+    public static String getPrice(Map<String, String> responses, String finalDeliveryType, String acceptedResponder) {
+
+        if (responses == null)
+            return null;
+
+        String rates = responses.get(acceptedResponder);
+
+        if (rates == null) {
+            return null;
+        }
+
+        if (finalDeliveryType.equalsIgnoreCase(CourierType.DEDICATED)) {
+
+        } else if (finalDeliveryType.equalsIgnoreCase(CourierType.SHARED)) {
+
+        }
+
+
+        return null;
     }
 
     public int getCourierLength() {
@@ -170,8 +192,9 @@ public class CourierState implements LinearState, QueryableState {
         return requestor;
     }
 
-    public Party getAcceptedParty() {
-        return acceptedParty;
+
+    public String getAcceptedResponder() {
+        return acceptedResponder;
     }
 
     public String getFinalQuotedPrice() {
@@ -218,9 +241,6 @@ public class CourierState implements LinearState, QueryableState {
     public PersistentState generateMappedObject(MappedSchema schema) {
         if (schema instanceof CourierSchemaV1) {
 
-            String acceptedParty = null;
-            if (this.acceptedParty != null)
-                acceptedParty = this.acceptedParty.getName().toString();
             return new CourierSchemaV1.PersistentCourier(
                     this.courierLength,
                     this.courierWidth,
@@ -230,7 +250,7 @@ public class CourierState implements LinearState, QueryableState {
                     this.source,
                     this.destination,
                     this.requestor.getName().toString(),
-                    acceptedParty,
+                    this.acceptedResponder,
                     this.finalQuotedPrice,
                     this.finalDeliveryType,
                     this.status,
@@ -258,7 +278,7 @@ public class CourierState implements LinearState, QueryableState {
                 ", source='" + source + '\'' +
                 ", destination='" + destination + '\'' +
                 ", requestor=" + requestor +
-                ", acceptedParty=" + acceptedParty +
+                ", acceptedResponder=" + acceptedResponder +
                 ", finalQuotedPrice='" + finalQuotedPrice + '\'' +
                 ", finalDeliveryType='" + finalDeliveryType + '\'' +
                 ", status='" + status + '\'' +

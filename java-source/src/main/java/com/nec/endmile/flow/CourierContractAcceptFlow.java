@@ -1,11 +1,15 @@
 package com.nec.endmile.flow;
 
+
+import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
+import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.contract.CourierContract;
 import com.nec.endmile.schema.CourierSchemaV1;
 import com.nec.endmile.state.CourierState;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndRef;
+import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.crypto.SecureHash;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
@@ -18,18 +22,26 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-public class CourierDocUploadFlow {
+public class CourierContractAcceptFlow {
+
+
     @InitiatingFlow
     @StartableByRPC
-    public static class Initiator extends FlowLogic<SignedTransaction> {
+    public static class Acceptor extends FlowLogic<SignedTransaction> {
         private final String courierId;
-        private final SecureHash.SHA256 courierReceiptHash;
+        private final String responderID;
+        private final String finalDeliveryType;
 
-        private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction based on new Courier.");
+
+        private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction for courier response.");
         private final ProgressTracker.Step VERIFYING_TRANSACTION = new ProgressTracker.Step("Verifying contract constraints.");
         private final ProgressTracker.Step SIGNING_TRANSACTION = new ProgressTracker.Step("Signing transaction with our private key.");
+
         private final ProgressTracker.Step FINALISING_TRANSACTION = new ProgressTracker.Step("Obtaining notary signature and recording transaction.") {
             @Override
             public ProgressTracker childProgressTracker() {
@@ -47,9 +59,10 @@ public class CourierDocUploadFlow {
                 FINALISING_TRANSACTION
         );
 
-            public Initiator(String courierId, SecureHash.SHA256 courierReceiptHash) {
+        public Acceptor(String courierId,String responderID, String finalDeliveryType) {
             this.courierId = courierId;
-            this.courierReceiptHash = courierReceiptHash;
+            this.responderID=responderID;
+            this.finalDeliveryType=finalDeliveryType;
         }
 
         @Override
@@ -57,6 +70,7 @@ public class CourierDocUploadFlow {
             return progressTracker;
         }
 
+        @Suspendable
         @Override
         public SignedTransaction call() throws FlowException {
             // Obtain a reference to the notary we want to use.
@@ -67,52 +81,61 @@ public class CourierDocUploadFlow {
             // Generate an unsigned transaction.
             Party me = getOurIdentity();
 
-            // Fetch existing courierState
+            //Vault query
             QueryCriteria.VaultQueryCriteria criteria = new QueryCriteria.VaultQueryCriteria();
-            Field courierIdField;
-            try {
-                courierIdField = CourierSchemaV1.PersistentCourier.class.getDeclaredField("courierId");
-            } catch(NoSuchFieldException e) {
-                throw new FlowException("courierId not present in schema");
-            }
 
-            CriteriaExpression courierIndex = Builder.equal(courierIdField, this.courierId);
-            QueryCriteria courierIdCriteria = new QueryCriteria.VaultCustomQueryCriteria<>(courierIndex);
-            courierIdCriteria.and(courierIdCriteria);
+            Field courierIDField;
+            try {
+                courierIDField = CourierSchemaV1.PersistentCourier.class.getDeclaredField("courierId");
+            } catch (NoSuchFieldException e) {
+                throw new FlowException("No field name linearId present in courier schema");
+            }
+            CriteriaExpression courierIndex = Builder.equal(courierIDField, this.courierId);
+            QueryCriteria courierIDCriteria = new QueryCriteria.VaultCustomQueryCriteria<>(courierIndex);
+
+            criteria.and(courierIDCriteria);
 
             Vault.Page<CourierState> queryResult = getServiceHub().getVaultService().queryBy(CourierState.class, criteria);
             List<StateAndRef<CourierState>> couriers = queryResult.getStates();
 
+
+            if (couriers == null) {
+                throw new FlowException("No couriers present in ledger");
+            }
+
             CourierState courierState = null;
             StateAndRef<CourierState> courierStateStateAndRef = null;
-            for(StateAndRef<CourierState> temp : couriers) {
-                if(temp.getState().getData().getCourierId().equals(courierId)) {
-                    courierState = temp.getState().getData();
+            for (StateAndRef<CourierState> temp : couriers) {
+                if (temp.getState().getData().getCourierId().equals(this.courierId)) {
                     courierStateStateAndRef = temp;
+                    courierState = temp.getState().getData();
                 }
             }
 
-            if(courierState == null) {
-                throw new FlowException("Courier not present in state");
+            if (courierState == null) {
+                throw new FlowException("Invalid courier id");
+            }else{
+                System.out.println("Courier input state"+courierState);
             }
 
-            // Create output state
-            CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(),
-                    courierState.getCourierWeight(), courierReceiptHash, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(),
-                    courierState.getAcceptedParty(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), courierState.getStatus(), courierState.getLinearId(),
-                    courierState.getResponses(), courierState.getCourierId(), courierState.getAutoNodes());
 
-            // Create command
-            final Command<CourierContract.Commands.CourierDocUpload> txCommand = new Command<>(
-                    new CourierContract.Commands.CourierDocUpload(),
+            //ENDS HERE
+
+            CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(), courierState.getCourierWeight(),
+            null, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), this.responderID,
+                    CourierState.getPrice(courierState.getResponses(),this.finalDeliveryType,this.responderID), this.finalDeliveryType, CourierStatus.COURIER_ACCEPTED, new UniqueIdentifier(), courierState.getResponses(),
+                    courierState.getCourierId(), courierState.getAutoNodes());
+
+
+
+            final Command<CourierContract.Commands.CourierContractAccept> txCommand = new Command<>(
+                    new CourierContract.Commands.CourierContractAccept(),
                     ImmutableList.of(me.getOwningKey()));
 
-            // Build transaction with attachment hash
             final TransactionBuilder txBuilder = new TransactionBuilder(notary)
                     .addInputState(courierStateStateAndRef)
                     .addOutputState(courierOutputState, CourierContract.CONTRACT_ID)
-                    .addCommand(txCommand)
-                    .addAttachment(courierReceiptHash);
+                    .addCommand(txCommand);
 
             // Stage 2.
             progressTracker.setCurrentStep(VERIFYING_TRANSACTION);
@@ -124,10 +147,13 @@ public class CourierDocUploadFlow {
             // Sign the transaction.
             final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
 
+
             // Stage 4
             progressTracker.setCurrentStep(FINALISING_TRANSACTION);
             // Notarise and record the transaction in both parties' vaults.
             return subFlow(new FinalityFlow(partSignedTx));
         }
     }
+
+
 }

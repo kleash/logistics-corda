@@ -42,8 +42,8 @@ public class CourierSchemaV1 extends MappedSchema {
         private final String destination;
         @Column(name = "requestor")
         private final String requestor;
-        @Column(name = "acceptedParty")
-        private final String acceptedParty;
+        @Column(name = "acceptedResponder")
+        private final String acceptedResponder;
         @Column(name = "finalQuotedPrice")
         private final String finalQuotedPrice;
         @Column(name = "finalDeliveryType")
@@ -59,7 +59,7 @@ public class CourierSchemaV1 extends MappedSchema {
         private final String courierId;
 
 
-        public PersistentCourier(int courierLength, int courierWidth, int courierHeight, int courierWeight, SecureHash.SHA256 courierReceiptHash, String source, String destination, String requestor, String acceptedParty,
+        public PersistentCourier(int courierLength, int courierWidth, int courierHeight, int courierWeight, SecureHash.SHA256 courierReceiptHash, String source, String destination, String requestor, String acceptedResponder,
                                  String finalQuotedPrice, String finalDeliveryType, String status, UUID linearId,
                                  Map<String, String> responses, String courierId) {
             this.courierLength = courierLength;
@@ -70,7 +70,7 @@ public class CourierSchemaV1 extends MappedSchema {
             this.source = source;
             this.destination = destination;
             this.requestor = requestor;
-            this.acceptedParty = acceptedParty;
+            this.acceptedResponder = acceptedResponder;
             this.finalQuotedPrice = finalQuotedPrice;
             this.finalDeliveryType = finalDeliveryType;
             this.status = status;
@@ -89,7 +89,7 @@ public class CourierSchemaV1 extends MappedSchema {
             this.source = null;
             this.destination = null;
             this.requestor = null;
-            this.acceptedParty = null;
+            this.acceptedResponder = null;
             this.finalQuotedPrice = null;
             this.finalDeliveryType = null;
             this.status = null;
@@ -130,8 +130,8 @@ public class CourierSchemaV1 extends MappedSchema {
             return requestor;
         }
 
-        public String getAcceptedParty() {
-            return acceptedParty;
+        public String getAcceptedResponder() {
+            return acceptedResponder;
         }
 
         public String getFinalQuotedPrice() {
