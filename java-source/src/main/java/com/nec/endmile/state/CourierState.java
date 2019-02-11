@@ -25,7 +25,7 @@ public class CourierState implements LinearState, QueryableState {
     private final int courierWidth;
     private final int courierHeight;
     private final int courierWeight;
-    private final SecureHash.SHA256 courierReceiptHash;
+    private final String courierReceiptHash;
     private final String source;
     private final String destination;
     private final Party requestor;
@@ -40,7 +40,9 @@ public class CourierState implements LinearState, QueryableState {
 
     @ConstructorForDeserialization
     public CourierState(int courierLength, int courierWidth, int courierHeight, int courierWeight,
-                        SecureHash.SHA256 courierReceiptHash, String source, String destination, Party requestor, String acceptedResponder,
+
+                        String courierReceiptHash, String source, String destination, Party requestor, String acceptedResponder,
+
                         String finalQuotedPrice, String finalDeliveryType, String status, UniqueIdentifier linearId, Map<String, String> responses,
                         String courierId, List<Party> autoNodes) {
         this.courierLength = courierLength;
@@ -176,7 +178,7 @@ public class CourierState implements LinearState, QueryableState {
         return courierWeight;
     }
 
-    public SecureHash.SHA256 getCourierReceiptHash() {
+    public String getCourierReceiptHash() {
         return courierReceiptHash;
     }
 

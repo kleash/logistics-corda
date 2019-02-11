@@ -26,7 +26,8 @@ import static net.corda.core.contracts.ContractsDSL.requireThat;
  * <p>
  * All contracts must sub-class the [Contract] interface.
  */
-public class CourierContract implements Contract {
+public class
+CourierContract implements Contract {
     public static final String CONTRACT_ID = "com.nec.endmile.contract.CourierContract";
 
     /**
@@ -45,8 +46,10 @@ public class CourierContract implements Contract {
             verifyCourierRate(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierContractAccept) {
             verifyCourierAccept(tx, setOfSigners);
-        }else if (commandData instanceof Commands.CourierDocUpload) {
+        } else if (commandData instanceof Commands.CourierDocUpload) {
             verifyCourierDocUpload(tx, setOfSigners);
+        } else if (commandData instanceof Commands.CourierPicked) {
+            verifyCourierPicked(tx, setOfSigners);
         } else {
             throw new IllegalArgumentException("Unrecognised command.");
         }
@@ -118,6 +121,20 @@ public class CourierContract implements Contract {
         });
     }
 
+    private void verifyCourierPicked(LedgerTransaction tx, Set<PublicKey> signers) {
+        requireThat(req -> {
+            req.using("Only one input state during CourierDocUpload flow",
+                    tx.getInputStates().size() == 1);
+            req.using("Only one output state during CourierDocUpload flow",
+                    tx.getOutputStates().size() == 1);
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Input CourierState should have 'accepted' status",
+                    courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED));
+            return null;
+        });
+    }
+
     /**
      * This contract implements all commands related to CourierState
      */
@@ -131,7 +148,13 @@ public class CourierContract implements Contract {
         class CourierDocUpload implements Commands {
         }
 
-         class CourierContractAccept implements Commands{
+
+        class CourierContractAccept implements Commands {
+
+        }
+
+        class CourierPicked implements Commands {
+
         }
     }
 }
