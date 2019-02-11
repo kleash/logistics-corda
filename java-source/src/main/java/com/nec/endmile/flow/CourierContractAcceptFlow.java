@@ -88,7 +88,7 @@ public class CourierContractAcceptFlow {
             try {
                 courierIDField = CourierSchemaV1.PersistentCourier.class.getDeclaredField("courierId");
             } catch (NoSuchFieldException e) {
-                throw new FlowException("No field name linearId present in courier schema");
+                throw new FlowException("No field name courierId present in courier schema");
             }
             CriteriaExpression courierIndex = Builder.equal(courierIDField, this.courierId);
             QueryCriteria courierIDCriteria = new QueryCriteria.VaultCustomQueryCriteria<>(courierIndex);
@@ -124,7 +124,7 @@ public class CourierContractAcceptFlow {
             String price = CourierState.getPrice(courierState.getResponses(),this.finalDeliveryType,this.responderID);
 
             if(price==null){
-                throw new FlowException("Courier responder id is not present or courier type is wrong");
+                throw new FlowException("Courier responder id is not present or courier delivery type is wrong");
             }
 
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(), courierState.getCourierWeight(),
