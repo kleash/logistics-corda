@@ -15,14 +15,14 @@ import static net.corda.core.contracts.ContractsDSL.requireSingleCommand;
 import static net.corda.core.contracts.ContractsDSL.requireThat;
 
 /**
- * A implementation of a basic smart contract in Corda.
+ * A implementation of a smart contract for Logistics - Last mile delivery
  * <p>
- * This contract enforces rules regarding the creation of a valid [IOUState], which in turn encapsulates an [IOU].
+ * This contract enforces rules regarding the creation of a valid [CourierState].
  * <p>
- * For a new [IOU] to be issued onto the ledger, a transaction is required which takes:
+ * For a new [CourierState] to be issued onto the ledger, a transaction is required which takes:
  * - Zero input states.
- * - One output state: the new [IOU].
- * - An Create() command with the public keys of both the lender and the borrower.
+ * - One output state: the new [CourierState].
+ * - A CourierPost() command
  * <p>
  * All contracts must sub-class the [Contract] interface.
  */
@@ -40,9 +40,9 @@ public class CourierContract implements Contract {
         final Set<PublicKey> setOfSigners = new HashSet<>(command.getSigners());
 
         if (commandData instanceof Commands.CourierPost) {
-            verifyInit(tx, setOfSigners);
+            verifyCourierPost(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierRate) {
-            verifyResponse(tx, setOfSigners);
+            verifyCourierRate(tx, setOfSigners);
         } else if (commandData instanceof Commands.CourierDocUpload) {
             verifyCourierDocUpload(tx, setOfSigners);
         } else {
@@ -52,7 +52,7 @@ public class CourierContract implements Contract {
     }
 
     // This only allows one courier per transaction.
-    private void verifyInit(LedgerTransaction tx, Set<PublicKey> signers) {
+    private void verifyCourierPost(LedgerTransaction tx, Set<PublicKey> signers) {
         requireThat(req -> {
             req.using("No inputs should be consumed when creating courier",
                     tx.getInputStates().isEmpty());
@@ -65,7 +65,7 @@ public class CourierContract implements Contract {
     }
 
     // This only allows one response per transaction.
-    private void verifyResponse(LedgerTransaction tx, Set<PublicKey> signers) {
+    private void verifyCourierRate(LedgerTransaction tx, Set<PublicKey> signers) {
         requireThat(req -> {
             req.using("Only one courier state when responding to courier request",
                     tx.getInputStates().size() == 1);
@@ -73,7 +73,7 @@ public class CourierContract implements Contract {
 
 
             CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
-            req.using("Courier Input state status can be either initiated or response received.", courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATE) || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_RESPONSE_RECEIVED));
+            req.using("Courier Input state status can be either initiated or response-received", courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATED) || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_RESPONSE_RECEIVED));
 
 
             return null;
@@ -84,6 +84,16 @@ public class CourierContract implements Contract {
 
     private void verifyCourierDocUpload(LedgerTransaction tx, Set<PublicKey> signers) {
         requireThat(req -> {
+            req.using("Only one input state during CourierDocUpload flow",
+                    tx.getInputStates().size() == 1);
+            req.using("Only one output state during CourierDocUpload flow",
+                    tx.getOutputStates().size() == 1);
+            req.using("Only one attachment during CourierDocUpload flow",
+                    tx.getAttachments().size() == 1);
+
+            CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
+            req.using("Input CourierState should have 'accepted' status",
+                    courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED));
             return null;
         });
     }

@@ -49,7 +49,7 @@ public class CourierResponseFlowTest {
         UniqueIdentifier uniqueIdentifier = new UniqueIdentifier();
         courierId=uniqueIdentifier.getId().toString();
         CourierState courierState = new CourierState(courierLength, courierWidth, courierHeight, courierWeight,source,
-                destination, amazon.getInfo().getLegalIdentities().get(0), CourierStatus.COURIER_INITIATE, uniqueIdentifier, uniqueIdentifier.getId().toString(), allParties);
+                destination, amazon.getInfo().getLegalIdentities().get(0), CourierStatus.COURIER_INITIATED, uniqueIdentifier, uniqueIdentifier.getId().toString(), allParties);
 
 
         final TransactionBuilder txBuilder = new TransactionBuilder(network.getDefaultNotaryIdentity()).addOutputState(courierState, CourierContract.CONTRACT_ID)

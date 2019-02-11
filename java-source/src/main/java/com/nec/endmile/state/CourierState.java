@@ -15,7 +15,7 @@ import net.corda.core.serialization.ConstructorForDeserialization;
 import java.util.*;
 
 /**
- * The state object recording Courier State.
+ * The state object recording CourierState.
  * <p>
  * A state must implement [ContractState] or one of its descendants.
  */

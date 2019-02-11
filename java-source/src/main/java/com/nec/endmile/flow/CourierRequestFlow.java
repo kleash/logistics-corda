@@ -90,7 +90,7 @@ public class CourierRequestFlow {
 
             UniqueIdentifier uniqueIdentifier = new UniqueIdentifier();
             CourierState courierState = new CourierState(this.courierLength, this.courierWidth, this.courierHeight, this.courierWeight,
-                    this.source, this.destination, me, CourierStatus.COURIER_INITIATE, uniqueIdentifier, uniqueIdentifier.getId().toString(), autoNodes);
+                    this.source, this.destination, me, CourierStatus.COURIER_INITIATED, uniqueIdentifier, uniqueIdentifier.getId().toString(), autoNodes);
 
             final Command<CourierContract.Commands.CourierPost> txCommand = new Command<>(
                     new CourierContract.Commands.CourierPost(),
