@@ -35,7 +35,6 @@ public class CourierRespondFlow {
         private final String courierId;
         private final String sharedPrice;
         private final String dedicatedPrice;
-        private final Party requestor;
 
 
         private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction for courier response.");
@@ -59,11 +58,10 @@ public class CourierRespondFlow {
                 FINALISING_TRANSACTION
         );
 
-        public Responder(String courierId, String sharedPrice, String dedicatedPrice,Party requestor) {
+        public Responder(String courierId, String sharedPrice, String dedicatedPrice) {
             this.courierId = courierId;
             this.sharedPrice = sharedPrice;
             this.dedicatedPrice = dedicatedPrice;
-            this.requestor=requestor;
         }
 
         @Override
@@ -131,7 +129,7 @@ public class CourierRespondFlow {
             //ENDS HERE
 
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(), courierState.getCourierWeight(),
-                    courierState.getSource(), courierState.getDestination(), requestor, CourierStatus.COURIER_RESPONSE_RECEIVED, new UniqueIdentifier(), courierState.getCourierId(), responses,allParties);
+                    courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), CourierStatus.COURIER_RESPONSE_RECEIVED, new UniqueIdentifier(), courierState.getCourierId(), responses,allParties);
 
 
             final Command<CourierContract.Commands.Respond> txCommand = new Command<>(
