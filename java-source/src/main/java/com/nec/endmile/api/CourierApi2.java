@@ -50,7 +50,7 @@ public class CourierApi2 {
      * <p>
      * curl -X POST 'http://localhost:10009/api/courier/uploadCourierReceipt?courierId=&courierReceiptPhoto='
      */
-    @PUT
+    @POST
     @Path("uploadCourierReceipt")
     public Response uploadCourierReceipt(@QueryParam("courierId") int courierId,
                                          @QueryParam("courierReceiptPhoto") InputStream courierReceiptPhoto) throws InterruptedException, ExecutionException {
@@ -79,9 +79,9 @@ public class CourierApi2 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X POST 'http://localhost:10009/api/courier/updateCourierState?courierId=&status='
+     * curl -X POST 'http://localhost:10012/api/courier/updateCourierState?courierId=&status='
      */
-    @PUT
+    @POST
     @Path("updateCourierStatus")
     public Response updateCourierStatus(@QueryParam("courierId") int courierId,
                                          @QueryParam("status") String status) throws InterruptedException, ExecutionException {
@@ -110,7 +110,7 @@ public class CourierApi2 {
      * <p>
      * curl -X POST 'http://localhost:10009/api/courier/cancelByRequestor?courierId='
      */
-    @PUT
+    @POST
     @Path("cancelByRequestor")
     public Response cancelByRequestor(@QueryParam("courierId") int courierId) throws InterruptedException, ExecutionException {
 
@@ -136,9 +136,9 @@ public class CourierApi2 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X POST 'http://localhost:10009/api/courier/cancelByResponder?courierId='
+     * curl -X POST 'http://localhost:10012/api/courier/cancelByResponder?courierId='
      */
-    @PUT
+    @POST
     @Path("cancelByResponder")
     public Response cancelByResponder(@QueryParam("courierId") int courierId) throws InterruptedException, ExecutionException {
 
