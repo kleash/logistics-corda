@@ -276,7 +276,7 @@ public class CourierState implements LinearState, QueryableState {
                 ", courierWidth=" + courierWidth + '\'' +
                 ", courierHeight=" + courierHeight + '\'' +
                 ", courierWeight=" + courierWeight + '\'' +
-                ", courierReceiptHash='" + courierReceiptHash.toString() + '\'' +
+                ", courierReceiptHash='" + courierReceiptHash + '\'' +
                 ", source='" + source + '\'' +
                 ", destination='" + destination + '\'' +
                 ", requestor=" + requestor +
