@@ -1,5 +1,6 @@
 package com.nec.endmile.flow;
 
+import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
 import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.contract.CourierContract;
@@ -56,6 +57,7 @@ public class CourierResponderCancelFlow {
             return progressTracker;
         }
 
+        @Suspendable
         @Override
         public SignedTransaction call() throws FlowException {
             // Obtain a reference to the notary we want to use.

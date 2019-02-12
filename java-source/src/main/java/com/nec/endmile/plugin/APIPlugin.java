@@ -4,7 +4,8 @@ import com.example.api.ExampleApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.nec.endmile.api.CourierApi;
+import com.nec.endmile.api.CourierApi1;
+import com.nec.endmile.api.CourierApi2;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.webserver.services.WebServerPluginRegistry;
 
@@ -16,7 +17,7 @@ public class APIPlugin implements WebServerPluginRegistry {
     /**
      * A list of classes that expose web APIs.
      */
-    private final List<Function<CordaRPCOps, ?>> webApis = ImmutableList.of(CourierApi::new);
+    private final List<Function<CordaRPCOps, ?>> webApis = ImmutableList.of(CourierApi1::new, CourierApi2::new);
 
     /**
      * A list of directories in the resources directory that will be served by Jetty under /web.
