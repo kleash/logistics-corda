@@ -118,8 +118,6 @@ CourierContract implements Contract {
                     tx.getInputStates().size() == 1);
             req.using("Only one output state during CourierDocUpload flow",
                     tx.getOutputStates().size() == 1);
-            req.using("Only one attachment during CourierDocUpload flow",
-                    tx.getAttachments().size() == 1);
 
             CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
             req.using("Input CourierState should have 'accepted' status",
