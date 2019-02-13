@@ -130,13 +130,13 @@ public class CourierState implements LinearState, QueryableState {
     }
 
 
-    public static Map<String, String> addResponse(Map<String, String> responses, String responderId, String sharedPrice, String dedicatedPrice) {
+    public static Map<String, String> addResponse(Map<String, String> responses, String responder, String sharedPrice, String dedicatedPrice) {
 
         if (responses == null) {
             responses = new LinkedHashMap<>();
         }
 
-        responses.put(responderId, sharedPrice + "-" + dedicatedPrice);
+        responses.put(responder, sharedPrice + "-" + dedicatedPrice);
 
         return responses;
     }

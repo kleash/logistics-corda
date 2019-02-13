@@ -32,7 +32,7 @@ public class CourierRespondFlow {
         private final String courierId;
         private final String sharedPrice;
         private final String dedicatedPrice;
-        private final String responderID;
+        private final String responder;
 
 
         private final ProgressTracker.Step GENERATING_TRANSACTION = new ProgressTracker.Step("Generating transaction for courier response.");
@@ -56,11 +56,11 @@ public class CourierRespondFlow {
                 FINALISING_TRANSACTION
         );
 
-        public Responder(String courierId, String sharedPrice, String dedicatedPrice,String responderID) {
+        public Responder(String courierId, String sharedPrice, String dedicatedPrice,String responder) {
             this.courierId = courierId;
             this.sharedPrice = sharedPrice;
             this.dedicatedPrice = dedicatedPrice;
-            this.responderID=responderID;
+            this.responder=responder;
         }
 
         @Override
@@ -123,7 +123,7 @@ public class CourierRespondFlow {
             }
 
 
-            responses = CourierState.addResponse(responses, responderID, this.sharedPrice ,this.dedicatedPrice);
+            responses = CourierState.addResponse(responses, responder, this.sharedPrice ,this.dedicatedPrice);
 
 
             //TODO Change it to create list of initiating party and AUTO nodes.

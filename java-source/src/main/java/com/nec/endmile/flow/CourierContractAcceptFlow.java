@@ -34,7 +34,7 @@ public class CourierContractAcceptFlow {
     @StartableByRPC
     public static class Acceptor extends FlowLogic<SignedTransaction> {
         private final String courierId;
-        private final String responderID;
+        private final String responder;
         private final String finalDeliveryType;
 
 
@@ -59,9 +59,9 @@ public class CourierContractAcceptFlow {
                 FINALISING_TRANSACTION
         );
 
-        public Acceptor(String courierId,String responderID, String finalDeliveryType) {
+        public Acceptor(String courierId,String responder, String finalDeliveryType) {
             this.courierId = courierId;
-            this.responderID=responderID;
+            this.responder=responder;
             this.finalDeliveryType=finalDeliveryType;
         }
 
@@ -121,14 +121,14 @@ public class CourierContractAcceptFlow {
             //ENDS HERE
 
 
-            String price = CourierState.getPrice(courierState.getResponses(),this.finalDeliveryType,this.responderID);
+            String price = CourierState.getPrice(courierState.getResponses(),this.finalDeliveryType,this.responder);
 
             if(price==null){
-                throw new FlowException("Courier responder id is not present or courier delivery type is wrong");
+                throw new FlowException("Courier responder is not present or courier delivery type is wrong");
             }
 
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(), courierState.getCourierWeight(),
-            null, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), this.responderID,
+            null, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(), this.responder,
                     price , this.finalDeliveryType, CourierStatus.COURIER_ACCEPTED, new UniqueIdentifier(), courierState.getResponses(),
                     courierState.getCourierId(), courierState.getAutoNodes());
 
