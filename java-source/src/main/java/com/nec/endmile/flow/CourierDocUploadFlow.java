@@ -2,6 +2,7 @@ package com.nec.endmile.flow;
 
 import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
+import com.nec.endmile.config.CourierStatus;
 import com.nec.endmile.contract.CourierContract;
 import com.nec.endmile.schema.CourierSchemaV1;
 import com.nec.endmile.state.CourierState;
@@ -103,7 +104,7 @@ public class CourierDocUploadFlow {
             // Create output state
             CourierState courierOutputState = new CourierState(courierState.getCourierLength(), courierState.getCourierWidth(), courierState.getCourierHeight(),
                     courierState.getCourierWeight(), courierReceiptHash, courierState.getSource(), courierState.getDestination(), courierState.getRequestor(),
-                    courierState.getAcceptedResponder(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), courierState.getStatus(), new UniqueIdentifier(),
+                    courierState.getAcceptedResponder(), courierState.getFinalQuotedPrice(), courierState.getFinalDeliveryType(), CourierStatus.COURIER_UPLOADED, new UniqueIdentifier(),
                     courierState.getResponses(), courierState.getCourierId(), courierState.getAutoNodes());
 
             // Create command

@@ -134,8 +134,8 @@ CourierContract implements Contract {
                     tx.getOutputStates().size() == 1);
 
             CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
-            req.using("Input CourierState should have 'accepted' status",
-                    courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED));
+            req.using("Input CourierState should have 'uploaded' status",
+                    courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_UPLOADED));
             return null;
         });
     }
