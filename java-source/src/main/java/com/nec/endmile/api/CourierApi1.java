@@ -2,7 +2,9 @@ package com.nec.endmile.api;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.nec.endmile.flow.CourierContractAcceptFlow;
 import com.nec.endmile.flow.CourierRequestFlow;
+import com.nec.endmile.flow.CourierRespondFlow;
 import com.nec.endmile.schema.CourierSchemaV1;
 import com.nec.endmile.state.CourierState;
 import net.corda.core.contracts.StateAndRef;
@@ -74,7 +76,7 @@ public class CourierApi1 {
      * Displays all Courier states that exist in the node's vault.
      */
     @GET
-    @Path("any/getAll")
+    @Path("requestor/getAll")
     @Produces(MediaType.APPLICATION_JSON)
     public List<StateAndRef<CourierState>> getAll() {
         return rpcOps.vaultQuery(CourierState.class).getStates();
@@ -97,20 +99,36 @@ public class CourierApi1 {
     }
 
     /**
+     * Displays courier by courierID.
+     */
+    @GET
+    @Path("any/getById")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getById(@QueryParam("courierID") String courierID) throws NoSuchFieldException {
+        QueryCriteria generalCriteria = new QueryCriteria.VaultQueryCriteria(Vault.StateStatus.UNCONSUMED);
+        Field statusInVault = CourierSchemaV1.PersistentCourier.class.getDeclaredField("courierId");
+        CriteriaExpression statusIndex = Builder.equal(statusInVault, courierID);
+        QueryCriteria statusCriteria = new QueryCriteria.VaultCustomQueryCriteria(statusIndex);
+        QueryCriteria criteria = generalCriteria.and(statusCriteria);
+        List<StateAndRef<CourierState>> results = rpcOps.vaultQueryByCriteria(criteria, CourierState.class).getStates();
+        return Response.status(OK).entity(results).build();
+    }
+
+    /**
      * Initiates a flow to create a Courier request.
      * <p>
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
-     *
+     * <p>
      * curl -X PUT 'http://localhost:10009/api/courier/requestor/create?courierLength=10&courierWidth=10&courierHeight=10&courierWeight=10&source=krpuram&destination=marathahalli&partyName=O=NECAuto,L=New%20York,C=US'
-            */
+     */
     @POST
     @Path("requestor/create")
     public Response create(@QueryParam("courierLength") int courierLength, @QueryParam("courierWidth") int courierWidth,
-                                  @QueryParam("courierHeight") int courierHeight, @QueryParam("courierWeight") int courierWeight,
-                                  @QueryParam("source") String source,
-                                  @QueryParam("destination") String destination,
-                                  @QueryParam("partyName") CordaX500Name partyName) throws InterruptedException, ExecutionException {
+                           @QueryParam("courierHeight") int courierHeight, @QueryParam("courierWeight") int courierWeight,
+                           @QueryParam("source") String source,
+                           @QueryParam("destination") String destination,
+                           @QueryParam("partyName") CordaX500Name partyName) throws InterruptedException, ExecutionException {
 
         if (partyName == null) {
             return Response.status(BAD_REQUEST).entity("Query parameter 'partyName' missing or has wrong format.\n").build();
@@ -124,6 +142,66 @@ public class CourierApi1 {
         try {
             final SignedTransaction signedTx = rpcOps
                     .startTrackedFlowDynamic(CourierRequestFlow.Initiator.class, courierLength, courierWeight, courierHeight, courierWeight, source, destination, otherParty)
+                    .getReturnValue()
+                    .get();
+
+            final String msg = String.format("Transaction id %s committed to ledger.\n", signedTx.getId());
+            return Response.status(CREATED).entity(msg).build();
+
+        } catch (Throwable ex) {
+            final String msg = ex.getMessage();
+            logger.error(ex.getMessage(), ex);
+            return Response.status(BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    /**
+     * Initiates a flow to create a Courier request.
+     * <p>
+     * <p>
+     * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
+     * <p>
+     * curl -X PUT 'http://localhost:10009/api/courier/responder/setFares?courierId=10&sharedPrice=10&dedicatedPrice=10&responderID=10'
+     */
+    @POST
+    @Path("responder/setFares")
+    public Response create(@QueryParam("courierId") String courierId, @QueryParam("sharedPrice") String sharedPrice,
+                           @QueryParam("dedicatedPrice") String dedicatedPrice, @QueryParam("responderID") String responderID) throws InterruptedException, ExecutionException {
+
+
+        try {
+            final SignedTransaction signedTx = rpcOps
+                    .startTrackedFlowDynamic(CourierRespondFlow.Responder.class, courierId, sharedPrice, dedicatedPrice, responderID)
+                    .getReturnValue()
+                    .get();
+
+            final String msg = String.format("Transaction id %s committed to ledger.\n", signedTx.getId());
+            return Response.status(CREATED).entity(msg).build();
+
+        } catch (Throwable ex) {
+            final String msg = ex.getMessage();
+            logger.error(ex.getMessage(), ex);
+            return Response.status(BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    /**
+     * Initiates a flow to accept a courier response.
+     * <p>
+     * <p>
+     * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
+     * <p>
+     * curl -X PUT 'http://localhost:10009/api/courier/requestor/acceptCourier?courierId=10&responderID=10&finalDeliveryType=10'
+     */
+    @POST
+    @Path("requestor/acceptCourier")
+    public Response create(@QueryParam("courierId") String courierId,@QueryParam("responderID") String responderID,
+                           @QueryParam("finalDeliveryType")  String finalDeliveryType) throws InterruptedException, ExecutionException {
+
+
+        try {
+            final SignedTransaction signedTx = rpcOps
+                    .startTrackedFlowDynamic(CourierContractAcceptFlow.Acceptor.class, courierId, responderID, finalDeliveryType)
                     .getReturnValue()
                     .get();
 
