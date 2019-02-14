@@ -32,6 +32,34 @@ public class CourierApi2 {
     }
 
     /**
+     * Requestor sending courierReceiptHash to update it in the CourierState.
+     * <p>
+     * <p>
+     * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
+     * <p>
+     * curl -X POST 'http://localhost:10009/api/couriers/requestor/sendCourierReceiptHash?courierId=&courierReceiptHash='
+     */
+    @POST
+    @Path("requestor/sendCourierReceiptHash")
+    public Response sendCourierReceiptHash(@QueryParam("courierId") String courierId,
+                                         @QueryParam("courierReceiptHash") String courierReceiptHash) throws InterruptedException, ExecutionException {
+        try {
+            final SignedTransaction signedTx = rpcOps
+                    .startTrackedFlowDynamic(CourierDocUploadFlow.Initiator.class, courierId, courierReceiptHash)
+                    .getReturnValue()
+                    .get();
+
+            final String msg = String.format("Transaction id %s committed to ledger.\n", signedTx.getId());
+            return Response.status(OK).entity(msg).build();
+
+        } catch (Throwable ex) {
+            final String msg = ex.getMessage();
+            logger.error(ex.getMessage(), ex);
+            return Response.status(BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    /**
      * Responder updating courier status to "picked" or "delivered"
      * <p>
      * <p>
