@@ -162,8 +162,9 @@ CourierContract implements Contract {
                     tx.getOutputStates().size() == 1);
 
             CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
-            req.using("Input CourierState should have either 'initiated' or 'accepted' status",
+            req.using("Input CourierState should have either 'initiated' or 'response-received', 'accepted' status",
                     (courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATED)
+                            || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_RESPONSE_RECEIVED)
                             || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED)));
             return null;
         });
@@ -177,8 +178,9 @@ CourierContract implements Contract {
                     tx.getOutputStates().size() == 1);
 
             CourierState courierState = tx.inputsOfType(CourierState.class).get(0);
-            req.using("Input CourierState should have either 'initiated' or 'accepted' status",
+            req.using("Input CourierState should have either 'initiated' or 'response-received', 'accepted' status",
                     (courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_INITIATED)
+                            || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_RESPONSE_RECEIVED)
                             || courierState.getStatus().equalsIgnoreCase(CourierStatus.COURIER_ACCEPTED)));
             return null;
         });
