@@ -111,7 +111,7 @@ public class CourierApi1 {
         QueryCriteria statusCriteria = new QueryCriteria.VaultCustomQueryCriteria(statusIndex);
         QueryCriteria criteria = generalCriteria.and(statusCriteria);
         List<StateAndRef<CourierState>> results = rpcOps.vaultQueryByCriteria(criteria, CourierState.class).getStates();
-        return Response.status(OK).entity(results).build();
+        return Response.status(OK).entity(results.get(0)).build();
     }
 
     /**
