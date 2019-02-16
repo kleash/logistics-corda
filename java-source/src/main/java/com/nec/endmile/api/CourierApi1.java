@@ -111,7 +111,7 @@ public class CourierApi1 {
         QueryCriteria statusCriteria = new QueryCriteria.VaultCustomQueryCriteria(statusIndex);
         QueryCriteria criteria = generalCriteria.and(statusCriteria);
         List<StateAndRef<CourierState>> results = rpcOps.vaultQueryByCriteria(criteria, CourierState.class).getStates();
-        return Response.status(OK).entity(results).build();
+        return Response.status(OK).entity(results.get(0)).build();
     }
 
     /**
@@ -122,7 +122,7 @@ public class CourierApi1 {
      * <p>
      * curl -X PUT 'http://localhost:10009/api/couriers/requestor/create?courierLength=10&courierWidth=10&courierHeight=10&courierWeight=10&source=krpuram&destination=marathahalli&partyName=O=NECAuto,L=New%20York,C=US'
      */
-    @POST
+    @GET
     @Path("requestor/create")
     public Response create(@QueryParam("courierLength") int courierLength, @QueryParam("courierWidth") int courierWidth,
                            @QueryParam("courierHeight") int courierHeight, @QueryParam("courierWeight") int courierWeight,
@@ -163,7 +163,7 @@ public class CourierApi1 {
      * <p>
      * curl -X PUT 'http://localhost:10012/api/couriers/responder/setFares?courierId=4d38ccbc-5a7a-49ce-bcc9-bfb21d40e5d4&sharedPrice=10&dedicatedPrice=10&responder=auto-1'
      */
-    @POST
+    @GET
     @Path("responder/setFares")
     public Response setFares(@QueryParam("courierId") String courierId, @QueryParam("sharedPrice") String sharedPrice,
                            @QueryParam("dedicatedPrice") String dedicatedPrice, @QueryParam("responder") String responder) throws InterruptedException, ExecutionException {
@@ -193,7 +193,7 @@ public class CourierApi1 {
      * <p>
      * curl -X PUT 'http://localhost:10009/api/couriers/requestor/acceptCourier?courierId=4d38ccbc-5a7a-49ce-bcc9-bfb21d40e5d4&responder=auto-1&finalDeliveryType=shared'
      */
-    @POST
+    @GET
     @Path("requestor/acceptCourier")
     public Response acceptCourier(@QueryParam("courierId") String courierId, @QueryParam("responder") String responder,
                            @QueryParam("finalDeliveryType")  String finalDeliveryType) throws InterruptedException, ExecutionException {
