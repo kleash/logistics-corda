@@ -120,7 +120,7 @@ public class CourierApi1 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X PUT 'http://localhost:10009/api/couriers/requestor/create?courierLength=10&courierWidth=10&courierHeight=10&courierWeight=10&source=krpuram&destination=marathahalli&partyName=O=NECAuto,L=New%20York,C=US'
+     * curl -X GET 'http://localhost:10009/api/couriers/requestor/create?courierLength=10&courierWidth=10&courierHeight=10&courierWeight=10&source=krpuram&destination=marathahalli&partyName=O=NECAuto,L=New%20York,C=US'
      */
     @GET
     @Path("requestor/create")
@@ -161,7 +161,7 @@ public class CourierApi1 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X PUT 'http://localhost:10012/api/couriers/responder/setFares?courierId=4d38ccbc-5a7a-49ce-bcc9-bfb21d40e5d4&sharedPrice=10&dedicatedPrice=10&responder=auto-1'
+     * curl -X GET 'http://localhost:10012/api/couriers/responder/setFares?courierId=4d38ccbc-5a7a-49ce-bcc9-bfb21d40e5d4&sharedPrice=10&dedicatedPrice=10&responder=auto-1'
      */
     @GET
     @Path("responder/setFares")
@@ -191,7 +191,7 @@ public class CourierApi1 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X PUT 'http://localhost:10009/api/couriers/requestor/acceptCourier?courierId=4d38ccbc-5a7a-49ce-bcc9-bfb21d40e5d4&responder=auto-1&finalDeliveryType=shared'
+     * curl -X GET 'http://localhost:10009/api/couriers/requestor/acceptCourier?courierId=4d38ccbc-5a7a-49ce-bcc9-bfb21d40e5d4&responder=auto-1&finalDeliveryType=shared'
      */
     @GET
     @Path("requestor/acceptCourier")

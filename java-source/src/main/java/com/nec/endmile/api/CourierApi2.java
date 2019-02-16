@@ -37,7 +37,7 @@ public class CourierApi2 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X POST 'http://localhost:10009/api/couriers/requestor/sendCourierReceiptHash?courierId=&courierReceiptHash='
+     * curl -X GET 'http://localhost:10009/api/couriers/requestor/sendCourierReceiptHash?courierId=&courierReceiptHash='
      */
     @GET
     @Path("requestor/sendCourierReceiptHash")
@@ -65,7 +65,7 @@ public class CourierApi2 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X POST 'http://localhost:10012/api/courier/responder/updateStatus?courierId=&status='
+     * curl -X GET 'http://localhost:10012/api/courier/responder/updateStatus?courierId=&status='
      */
     @GET
     @Path("responder/updateStatus")
@@ -94,9 +94,9 @@ public class CourierApi2 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X POST 'http://localhost:10009/api/courier/requestor/cancelByRequestor?courierId='
+     * curl -X GET 'http://localhost:10009/api/courier/requestor/cancelByRequestor?courierId='
      */
-    @POST
+    @GET
     @Path("requestor/cancelByRequestor")
     public Response cancelByRequestor(@QueryParam("courierId") String courierId) throws InterruptedException, ExecutionException {
 
@@ -122,7 +122,7 @@ public class CourierApi2 {
      * <p>
      * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
      * <p>
-     * curl -X POST 'http://localhost:10012/api/courier/responder/cancelByResponder?courierId='
+     * curl -X GET 'http://localhost:10012/api/courier/responder/cancelByResponder?courierId='
      */
     @GET
     @Path("responder/cancelByResponder")
