@@ -4,4 +4,4 @@
 
 # Logistics CorDapp
 
-Welcome to the Logistics CorDapp. This CorDapp is documented [here](http://docs.corda.net/tutorial-cordapp.html).
+Welcome to the Logistics CorDapp. This CorDapp is a decentralized place for food/package delivery ecosystem
